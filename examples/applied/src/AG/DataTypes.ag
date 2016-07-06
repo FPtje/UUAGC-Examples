@@ -1,0 +1,33 @@
+-- NOTE: there is NO module declaration here! That is because this file
+-- does not generate any Haskell code. It only exists to tell UUAGC
+-- the structure of the Expression ADT, which is defined in src/Expression.hs
+
+
+-- Type alias to let UUAGC reason about lists of expressions
+type ExprList = [Expression]
+
+
+-- This Expression declaration MUST follow the same structure
+-- as the actual original data definition, in this case defined in
+-- src/Expression.hs
+-- Note that each field must be given a name. If they don't exist in the
+-- original definition (as is the case in src/Expression.hs), you can use
+-- arbitrary names.
+data Expression
+    -- Represents literal number
+    | Number
+        value :: Int
+
+    -- Adding two expressions
+    | Add
+        left :: Expression
+        right :: Expression
+
+    -- Multiplying two expressions
+    | Multiply
+        left :: Expression
+        right :: Expression
+
+    -- The sum of an array of expressions
+    | Sum
+        exprs :: ExprList

@@ -1,6 +1,6 @@
-name:                uuagc-pure
+name:                uuagc-applied
 version:             0.1.0.0
-synopsis:            An example project showing how to set up UUAGC. This example has the data structure defined in UUAGC.
+synopsis:            An example project showing how to set up UUAGC. This example does NOT have the data structure defined in UUAGC.
 license:             MIT
 license-file:        LICENSE
 author:              FPtje
@@ -19,9 +19,7 @@ executable uuagc-example
   -- AG modules are to be declared in the other-modules field
   other-modules:
         AG.DataTypes,
-        AG.Attributes,
-        AG.HelperFuncs
-
+        AG.PrettyPrint
 
   build-depends:
         base >= 4.8 && <4.9,

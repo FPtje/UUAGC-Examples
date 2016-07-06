@@ -1,0 +1,23 @@
+
+-- The file that declares the Expression ADT
+file : "src/AG/DataTypes.ag"
+options :
+    haskellsyntax
+
+    -- NOTE: the 'data' option is missing from these options, unlike in the
+    -- pure example! This is because we don't want this AG file to re-create
+    -- the data structure!
+
+-- Contains the attributes related to pretty printing expressions
+file : "src/AG/PrettyPrint.ag"
+options :
+    haskellsyntax,
+    -- The following two options have the compiler generate functions to access
+    -- the attributes from the outside
+    catas,
+    semfuns,
+    wrappers,
+    -- generate signatures for semantic functions
+    signatures,
+    -- optimize generated code
+    optimize

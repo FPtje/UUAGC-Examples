@@ -1,0 +1,163 @@
+-- | Defines some attributes on the ADT defined in DataTypes
+module {AG.PrettyPrint}
+{prettyprint}
+{
+-- We need to import the file that contains the original data type
+import Expression
+}
+
+{
+-- The type alias ExprList needs to be recreated in Haskell.
+type ExprList = [Expression]
+
+-- Helper function to put a string in parentheses
+parens :: String -> String
+parens s = "(" ++ s ++ ")"
+}
+
+-- This include is important
+-- It allows this AG file to "see" the structure of the ADT
+-- It is necessary to be able to define attributes
+include "DataTypes.ag"
+
+-- Attributes here apply to both lists of Expressions and Expressions
+attr ExprList Expression
+    -- Simple String based pretty printer. In real applications I would
+    -- recommend using a pretty printing library.
+    syn prettyPrinted :: String
+
+
+-- Attributes here apply to Expressions
+attr Expression
+    -- This attribute holds whether an expression is a literal number (i.e. not
+    -- a sub-expression)
+    -- Note the "use {(\_ _ -> False)} {False}". This means that the default value
+    -- is False and that two values of isNumber are to be combined using the
+    -- lambda function (which always returns false).
+    syn isNumber use {(\_ _ -> False)} {False} :: Bool
+
+
+-- Attributes here only apply to ExprList
+attr ExprList
+    -- The head of the expression list requires some special attention when
+    -- pretty printing. In particular, no comma should be printed before the
+    -- first value of the list
+    inh isHead :: Bool
+
+
+
+-- The 'sem'antics define the attributes (as opposed to declaring them, which is
+-- what 'attr' does)
+sem ExprList
+    | Cons
+        -- Pretty print one element of the list
+        -- if it's the head, prepend with "[ ", otherwise prepend with ", ".
+        -- Note that it adds the prettyPrinted attribute of the tail.
+        lhs.prettyPrinted =
+            if @lhs.isHead then
+                "[" ++ @hd.prettyPrinted ++ @tl.prettyPrinted
+            else
+                ", " ++ @hd.prettyPrinted ++ @tl.prettyPrinted
+
+        -- The tail is not the head anymore
+        tl.isHead = False
+
+    | Nil
+        -- the end of the list is denoted with a ']'
+        lhs.prettyPrinted = "]"
+
+
+-- The semantics of an expression
+sem Expression
+    | Number
+        -- Numbers can be printed using show
+        lhs.prettyPrinted = show @value
+
+        -- The only place where we need to set isNumber. The default is set to
+        -- False, and the combine function that always returns false will make
+        -- sure that this attribute will not remain True above the parent of
+        -- this number.
+        lhs.isNumber = True
+
+    | Add
+        -- local attributes. Put parentheses around expressions, but only
+        -- when they're not directly numbers
+        loc.leftPP =
+            if @left.isNumber then
+                @left.prettyPrinted
+            else
+                parens @left.prettyPrinted
+
+        loc.rightPP =
+            if @right.isNumber then
+                @right.prettyPrinted
+            else
+                parens @right.prettyPrinted
+
+        lhs.prettyPrinted = @loc.leftPP ++ " + " ++ @loc.rightPP
+
+    | Multiply
+        loc.leftPP =
+            if @left.isNumber then
+                @left.prettyPrinted
+            else
+                parens @left.prettyPrinted
+
+        loc.rightPP =
+            if @right.isNumber then
+                @right.prettyPrinted
+            else
+                parens @right.prettyPrinted
+
+        lhs.prettyPrinted = @loc.leftPP ++ " * " ++ @loc.rightPP
+
+    | Sum
+        lhs.prettyPrinted = "sum " ++ @exprs.prettyPrinted
+
+        -- This isHead = True will pass down to the first element of the list
+        -- which will take care that the next element has isHead set to False.
+        exprs.isHead = True
+
+
+
+-- We would like some functions that, given some Expression value, would return
+-- the value of one or more attributes.
+{
+
+-- | Contains the default values for the inherited attribute(s)
+-- All inherited and chained attributes need a base value. In our case,
+-- the seen numbers is the only attribute that requires a base value.
+-- The data type called "Inh_<Your data type>" stores these base values. A value
+-- of this type is required to retrieve the attributes.
+--
+-- In this case, though, Expression has no inherited values. ExprList does,
+-- but we need not worry about that when reasoning about Expression.
+-- Inh_Expression is thus just an empty data constructor.
+defaultInherited :: Inh_Expression
+defaultInherited =
+    Inh_Expression
+
+-- | Returns all synthesized and chained attributes of a given Expression
+-- it uses the function wrap_expression, which essentially takes the expression
+-- the base values of the inherited attributes and returns a Syn_Expression
+-- which is a simple data structure that holds the value of all the synthesized
+-- and chained attributes.
+-- Note the sem_Expression function. The Expression value needs to be
+-- transformed into a suitable type called T_Expression that UUAGC can work with
+-- sem_Expression does that.
+allAttributes :: Expression -> Syn_Expression
+allAttributes expr =
+    wrap_Expression
+        (sem_Expression expr)
+        defaultInherited
+
+-- Individual functions to retrieve the values of individual synthesized
+-- attributes
+
+-- | Returns the value of the synthesized attribute "prettyprint"
+-- Note the name of <attribute name>_Syn_<Data type name>. It is a field
+-- of Syn_Expression.
+prettyprint :: Expression -> String
+prettyprint expr = prettyPrinted_Syn_Expression (allAttributes expr)
+
+}
