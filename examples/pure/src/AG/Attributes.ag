@@ -1,0 +1,147 @@
+-- | Defines some attributes on the ADT defined in DataTypes
+module {AG.Attributes}
+{} -- Exports of this module, empty for none
+{
+-- Import the DataTypes through Haskell imports too
+-- This allows us to refer to the data types in the Haskell code
+import AG.DataTypes
+}
+
+-- This include is important
+-- It allows this AG file to "see" the structure of the ADT
+-- It is necessary to be able to define attributes
+include "DataTypes.ag"
+
+-- Let's declare some attributes
+
+
+-- Attributes following this attr statement apply to Expressions and ExprList.
+-- Note that this is where the the type alias in DataTypes.ag shines. We would
+-- not have been able to define attributes on ExprList if it wasn't in a type
+-- alias.
+attr ExprList Expression
+    -- 'chn' chained are threaded through the entire data structure, DFS style.
+    -- This attribute just contains all the seen numbers
+    -- Note the [Int] being in curly braces. This is because it's a somewhat
+    -- more complicated type
+    chn seenNumbers :: {[Int]}
+
+-- Attributes here only apply to Expression
+attr Expression
+    -- 'syn'thesized attributes bubble up in the data structure
+    -- the 'evaluated' attribute will hold the the evaluated number of an
+    -- expression
+    syn evaluated :: Int
+
+
+-- Attributes here only apply to ExprList
+attr ExprList
+    -- 'inh'erited attributes trickle down the ADT.
+    -- This attribute assigns indexes to the values in the list
+    inh index :: Int
+
+    -- The sum of the expressions held by the list
+    syn sum :: Int
+
+
+-- The 'sem'antics define the attributes (as opposed to declaring them, which is
+-- what 'attr' does)
+
+-- Again, we can define semantics of ExprList because it was a type alias
+-- Now we can refer to the Cons and Nil of the list
+sem ExprList
+    | Cons
+        -- tl refers to the tail of the list
+        -- @lhs.index requests the index attribute of the left-hand side (lhs)
+        -- @lhs in this case being Cons
+
+        -- Note that we're setting the attribute of a child (the tail)
+        -- This is because index is an inherited attribute
+        tl.index = @lhs.index + 1
+
+        -- evaluated is a synthesized attribute, so we set that on the lhs
+        -- so that the parent can read it. Note that it uses the evaluated
+        -- fields of its children, hd and tl.
+        lhs.sum = @hd.evaluated + @tl.sum
+
+    | Nil
+        -- chained attributes can both go up and down the tree. In this
+        -- particular example, it is stated that the seen numbers of the Nil of
+        -- the list is the same as the seen numbers it received from the parent
+
+        -- This statement is optional, UUAGC will figure it out on its own when
+        -- omitted, but it shows nicely how chained attributes conceptually work
+        lhs.seenNumbers = @lhs.seenNumbers
+
+        -- The sum of the empty list is 0
+        lhs.sum = 0
+
+-- The semantics of an expression
+sem Expression
+    | Number
+        lhs.evaluated = @value
+
+        -- Another example of the chained seenNumbers, in this case, we add
+        -- the number we're seein right now to what has been seen so far.
+        lhs.seenNumbers = @value : @lhs.seenNumbers
+
+    | Add
+        lhs.evaluated = @left.evaluated + @right.evaluated
+
+        -- The right child gets the seenNumbers of the left child and the
+        -- lhs.seenNumbers are those collected by the right child.
+        -- This is what chained attributes do, these two lines are optional
+        -- again, they're written down for demonstration purposes.
+        right.seenNumbers = @left.seenNumbers
+        lhs.seenNumbers = @right.seenNumbers
+
+    | Multiply
+        lhs.evaluated = @left.evaluated * @right.evaluated
+
+    | Sum
+        lhs.evaluated = @exprs.sum
+
+
+-- We would like some functions that, given some Expression value, would return
+-- the value of one or more attributes.
+{
+
+-- | Contains the default values for the inherited attribute(s)
+-- All inherited and chained attributes need a base value. In our case,
+-- the seen numbers is the only attribute that requires a base value.
+-- The data type called "Inh_<Your data type>" stores these base values. A value
+-- of this type is required to retrieve the attributes.
+defaultInherited :: Inh_Expression
+defaultInherited =
+    Inh_Expression
+        { seenNumbers_Inh_Expression = []
+        }
+
+-- | Returns all synthesized and chained attributes of a given Expression
+-- it uses the function wrap_expression, which essentially takes the expression
+-- the base values of the inherited attributes and returns a Syn_Expression
+-- which is a simple data structure that holds the value of all the synthesized
+-- and chained attributes.
+-- Note the sem_Expression function. The Expression value needs to be
+-- transformed into a suitable type called T_Expression that UUAGC can work with
+-- sem_Expression does that.
+allAttributes :: Expression -> Syn_Expression
+allAttributes expr =
+    wrap_Expression
+        (sem_Expression expr)
+        defaultInherited
+
+-- Individual functions to retrieve the values of individual synthesized
+-- attributes
+
+-- | Returns the value of the synthesized attribute "evaluated"
+-- Note the name of <attribute name>_Syn_<Data type name>. It is a field
+-- of Syn_Expression.
+evaluated :: Expression -> Int
+evaluated expr = evaluated_Syn_Expression (allAttributes expr)
+
+-- | Returns the value of chained attribute "seenNumbers"
+seenNumbers :: Expression -> [Int]
+seenNumbers expr = seenNumbers_Syn_Expression (allAttributes expr)
+
+}

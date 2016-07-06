@@ -1,0 +1,21 @@
+-- Defines helper functions related to the ADTs defined in AG.DataTypes
+module {AG.HelperFuncs}
+{} -- Exports of this module, empty for none
+{
+-- Import the DataTypes ag file through Haskell imports, since we don't need
+-- to define attributes in this file, but we DO need the data definition
+import AG.DataTypes
+}
+
+
+
+-- These helper functions can be written in plain haskell syntax,
+-- as long as they're in curly braces.
+{
+-- | An empty expression
+empty :: Expression
+empty = Sum []
+}
+
+-- This AG file might as well have been a normal Haskell file. It's an AG for
+-- demonstration purposes

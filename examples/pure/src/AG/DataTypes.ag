@@ -1,0 +1,51 @@
+-- | Defines the data types
+module {AG.DataTypes}
+{} -- Exports of this module, empty for none
+{
+-- Imports
+}
+
+
+
+-- A simple AST description of some expression language
+-- Note: every field must have a name. These names can overlap.
+
+-- Type aliases in UUAGC are more than just a type alias
+-- Type aliases of common types (lists, tuples, maybe, either, map) you to
+-- create attributes for the lists and recurse deeper into the tree structure
+-- See: http://foswiki.cs.uu.nl/foswiki/HUT/AttributeGrammarManual#type
+type ExprList = [Expression]
+
+
+data Expression
+    -- Represents literal number
+    | Number
+        value :: Int
+
+    -- Adding two expressions
+    | Add
+        left :: Expression
+        right :: Expression
+
+    -- Multiplying two expressions
+    | Multiply
+        left :: Expression
+        right :: Expression
+
+    -- The sum of an array of expressions
+    | Sum
+        exprs :: ExprList
+
+-- Deriving instances is done with a separate syntax
+deriving Expression : Eq, Ord, Show
+
+-- I strongly recommend /against/ writing any functions in AG files that define
+-- ADTs. This is because the "include" mechanism in AG files isn't smart.
+-- Including in AG files means the contents of the included AG file are copied
+-- verbatim into the AG file that includes.
+-- This can cause problems when two AG files include the same, third AG file.
+-- After all, both those AG files would define the same functions.
+-- When one of those AG files then includes the other, function name conflicts
+-- occur. This can be a big pain.
+-- In short: Put ADTs and type synonyms in their own files
+-- Put helper functions in other AG files.

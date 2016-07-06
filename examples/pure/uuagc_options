@@ -1,0 +1,36 @@
+
+-- The file that defines the ADT(s)
+file : "src/AG/DataTypes.ag"
+options :
+    haskellsyntax,
+
+    -- The data option exists because we want UUAGC to actually generate
+    -- a data definition from that description
+    data,
+
+    -- Optional: all fields in the data definition(s) are strict
+    strictdata
+
+
+-- Helper functions AG file
+-- Note the lack of the "data" option
+-- This file happens to include DataTypes.ag, we don't want it to redefine the
+-- same ADT. We don't want conflicting definitions of the same ADT.
+file : "src/AG/Attributes.ag"
+options :
+    haskellsyntax,
+    -- The following two options have the compiler generate functions to access
+    -- the attributes from the outside
+    catas,
+    semfuns,
+    wrappers,
+    -- generate signatures for semantic functions
+    signatures,
+    -- optimize generated code
+    optimize
+
+
+-- Helper functions AG file
+file : "src/AG/HelperFuncs.ag"
+options :
+    haskellsyntax
