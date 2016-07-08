@@ -12,3 +12,17 @@ Some noteworthy files:
 - **[`uuagc_options`](uuagc_options)** - Shows the compiler options for the AG files in the example.
 - **[`DataTypes.ag`](src/AG/DataTypes.ag)** - Contains an AG declaration of the `Expression` ADT.
 - **[`PrettyPrint.ag`](src/AG/PrettyPrint.ag)** - Defines the attributes.
+
+
+# Compiling
+Compiling and running this example should be straightforward:
+
+```bash
+cd examples/02-applied # If you're not in this directory already
+cabal sandbox init
+cabal install --only-dependencies
+cabal build
+cabal run uuagc-example
+```
+
+If this fails, please report an issue. Common and even uncommon reasons why these commands would fail should be documented in a FAQ.
