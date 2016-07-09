@@ -1,0 +1,48 @@
+-- | Defines the data types
+module {AG.Example2}
+{} -- Exports of this module, empty for none
+{
+-- Imports
+}
+
+-- Explanation of this example here:
+-- http://foswiki.cs.uu.nl/foswiki/bin/view/HUT/AttributeGrammarManual#Example_2:_Multiple_attributes_44_and_wrappers
+
+
+data Tree
+   | Node  left  :: Tree
+           right :: Tree
+   | Tip   value :: Int
+
+attr Tree
+   syn sum   :: Int
+   syn max   :: Int
+   syn front :: {[Int]}
+   syn copy  :: Tree
+
+sem Tree
+  | Tip   lhs.max  =  @value
+          lhs.sum  =  @value
+  | Node  lhs.sum  =  @left.sum   +   @right.sum
+             .max  =  @left.max `max` @right.max
+
+sem Tree
+  | Node  lhs.front = @left.front ++ @right.front
+          lhs.copy  = Node @left.copy @right.copy
+  | Tip   lhs.front = [ @value ]
+          lhs.copy  = Tip @value
+
+{
+main :: IO ()
+main = print (show result)
+
+testTree :: Tree
+testTree = Node (Tip 1) (Node (Tip 2) (Tip 3))
+
+test :: T_Tree
+test = sem_Tree testTree
+
+result :: [Int]
+result = front_Syn_Tree (wrap_Tree test Inh_Tree)
+}
+-- output of the program will be "[1,2,3]"

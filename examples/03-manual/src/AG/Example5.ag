@@ -1,0 +1,51 @@
+-- | Defines the data types
+module {AG.Example5}
+{} -- Exports of this module, empty for none
+{
+-- Imports
+}
+
+-- Explanation of this example here:
+-- http://foswiki.cs.uu.nl/foswiki/HUT/AttributeGrammarManual#Example_5:_Two_45pass_traversals
+
+data Root
+   | Root  tree  :: Tree
+
+data Tree
+   | Node  left  :: Tree
+           right :: Tree
+   | Tip   value :: Int
+
+set Every = Root Tree
+
+deriving Every : Show
+
+attr Every
+   syn transformed :: self
+
+attr Tree
+   inh replacement :: Int
+   syn sum         :: Int
+
+sem Tree
+  | Tip   lhs.transformed = Tip @lhs.replacement
+          lhs.sum         = @value
+  | Node  lhs.sum         = @left.sum + @right.sum
+
+sem Root
+  | Root  tree.replacement = @tree.sum
+
+{
+main :: IO ()
+main = print (show result)
+
+testRoot :: Root
+testRoot = Root (Node (Tip 1) (Node (Tip 2) (Tip 3)))
+
+test :: T_Root
+test = sem_Root testRoot
+
+result :: Root
+result = transformed_Syn_Root (wrap_Root test Inh_Root)
+}
+-- output of the program will be "Node (Tip 6) (Node (Tip 6) (Tip 6))"

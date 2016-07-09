@@ -1,0 +1,51 @@
+
+
+file : "src/AG/Example1.ag"
+options :
+    data,
+    catas,
+    semfuns,
+    wrappers,
+    signatures,
+    haskellsyntax
+
+
+file : "src/AG/Example2.ag"
+options :
+    data,
+    catas,
+    semfuns,
+    wrappers,
+    signatures,
+    haskellsyntax
+
+
+file : "src/AG/Example3.ag"
+options :
+    data,
+    catas,
+    semfuns,
+    wrappers,
+    signatures,
+    haskellsyntax
+
+
+file : "src/AG/Example4.ag"
+options :
+    data,
+    catas,
+    semfuns,
+    wrappers,
+    signatures,
+    haskellsyntax
+
+
+file : "src/AG/Example5.ag"
+options :
+    data,
+    catas,
+    semfuns,
+    wrappers,
+    signatures,
+    haskellsyntax
+

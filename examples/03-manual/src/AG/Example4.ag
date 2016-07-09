@@ -1,0 +1,50 @@
+-- | Defines the data types
+module {AG.Example4}
+{} -- Exports of this module, empty for none
+{
+-- Imports
+}
+
+-- Explanation of this example here:
+-- http://foswiki.cs.uu.nl/foswiki/HUT/AttributeGrammarManual#Example_4:_Multiple_datatypes_44_the_self_pseudotype_44_auto_45generated_rules
+
+
+data Root
+   | Root  tree  :: Tree
+
+data Tree
+   | Node  left  :: Tree
+           right :: Tree
+   | Tip   value :: Int
+
+deriving Root Tree : Show
+
+attr Root Tree
+   syn transformed :: self
+
+attr Tree
+   inh replacement :: Int
+
+sem Tree
+  | Tip   lhs.transformed = Tip @lhs.replacement
+
+sem Root
+  | Root  tree.replacement = 37
+
+{
+main :: IO ()
+main = print (show result)
+
+testTree :: Tree
+testTree = Node (Tip 1) (Node (Tip 2) (Tip 3))
+
+testRoot :: Root
+testRoot = Root testTree
+
+test :: T_Root
+test = sem_Root testRoot
+
+result :: Root
+result = transformed_Syn_Root (wrap_Root test Inh_Root)
+}
+-- output of the program will be "Root (Node (Tip 37) (Node (Tip 37) (Tip 37)))"

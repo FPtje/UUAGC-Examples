@@ -1,0 +1,43 @@
+-- | Defines the data types
+module {AG.Example3}
+{} -- Exports of this module, empty for none
+{
+-- Imports
+}
+
+-- Explanation of this example here:
+-- http://foswiki.cs.uu.nl/foswiki/bin/view/HUT/AttributeGrammarManual#Example_3:_Inherited_attributes
+
+
+data Tree
+   | Node  left  :: Tree
+           right :: Tree
+   | Tip   value :: Int
+
+deriving Tree : Show
+
+attr Tree
+   inh replacement :: Int
+   syn transformed :: Tree
+
+sem Tree
+  | Node  lhs.transformed   = Node @left.transformed @right.transformed
+          left.replacement  = @lhs.replacement
+          right.replacement = @lhs.replacement
+  | Tip   lhs.transformed   = Tip @lhs.replacement
+
+
+{
+main :: IO ()
+main = print (show result)
+
+testTree :: Tree
+testTree = Node (Tip 1) (Node (Tip 2) (Tip 3))
+
+test :: T_Tree
+test = sem_Tree testTree
+
+result :: Tree
+result = transformed_Syn_Tree (wrap_Tree test Inh_Tree{replacement_Inh_Tree=37} )
+}
+-- output of the program will be "Node (Tip 37) (Node (Tip 37) (Tip 37))"

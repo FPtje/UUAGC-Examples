@@ -1,0 +1,36 @@
+name:                uuagc-manual
+version:             0.1.0.0
+synopsis:            An example project showing how to set up UUAGC. This example has the data structure defined in UUAGC.
+license:             MIT
+license-file:        LICENSE
+author:              FPtje
+maintainer:          fpeijnenburg@gmail.com
+category:            Example
+
+-- IMPORTANT: The build-type must be set to Custom
+-- since UUAGC needs to run hooks, see the custom Setup.hs
+build-type:          Custom
+
+cabal-version:       >=1.10
+
+executable uuagc-example
+  main-is:             Main.hs
+
+  -- AG modules are to be declared in the other-modules field
+  other-modules:
+        AG.Example1,
+        AG.Example2,
+        AG.Example3,
+        AG.Example4,
+        AG.Example5
+
+
+  build-depends:
+        base >= 4.8 && <4.9,
+        uuagc >= 0.9.52.1 && < 0.10.0.0,
+
+        -- uuagc-cabal provides the hooks seen in Setup.hs
+        uuagc-cabal >= 1.0.6.0
+
+  hs-source-dirs:      src
+  default-language:    Haskell2010
